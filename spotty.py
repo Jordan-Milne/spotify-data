@@ -4,6 +4,10 @@ from dotenv import load_dotenv, find_dotenv
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
+from sklearn.model_selection import train_test_split
+from sklearn_pandas import DataFrameMapper
+from sklearn.preprocessing import StandardScaler, LabelEncoder, LabelBinarizer
+from sklearn.ensemble import RandomForestClassifier
 
 # Loading API keys
 load_dotenv(find_dotenv())
@@ -19,7 +23,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 def analyze_playlist(creator, playlist_id,person):
 
     # Create empty dataframe
-    column_list = ["artist","album","track_name",  "track_id","danceability","energy","key","loudness","mode", "speechiness","instrumentalness","liveness","valence","tempo", "duration_ms","time_signature"]
+    column_list = ["artist","album","track_name",  "track_id","explicit", "danceability","energy","key","loudness","mode", "speechiness","instrumentalness","liveness","valence","tempo", "duration_ms","time_signature"]
 
     main_df = pd.DataFrame(columns = column_list)
 
@@ -32,10 +36,11 @@ def analyze_playlist(creator, playlist_id,person):
         features["album"] = track["track"]["album"]["name"]
         features["track_name"] = track["track"]["name"]
         features["track_id"] = track["track"]["id"]
+        features["explicit"] = track['track']['explicit']
 
         # collecting meta data (audio features)
         audio_features = sp.audio_features(features["track_id"])[0]
-        for feature in column_list[4:]:
+        for feature in column_list[5:]:
             features[feature] = audio_features[feature]
 
         # merge
@@ -48,7 +53,7 @@ def analyze_playlist(creator, playlist_id,person):
 # Loading my personal playlist and my gf's personal playlists (top songs for 2018 & 2019 curated by spotify)
 play_list1_id = os.environ['pl1_id']
 play_list2_id = os.environ['pl2_id']
-play_list2_id = os.environ['pl3_id']
+play_list3_id = os.environ['pl3_id']
 play_list4_id = os.environ['pl4_id']
 
 df1 = analyze_playlist("spotify", play_list1_id,'jordan')
@@ -59,10 +64,6 @@ df4 = analyze_playlist("spotify", play_list4_id,'jordan')
 # merge
 df = pd.concat([df1, df2,df3,df4], ignore_index = True)
 
-from sklearn.model_selection import train_test_split
-from sklearn_pandas import DataFrameMapper
-from sklearn.preprocessing import StandardScaler
-
 target = 'person'
 y = df[target]
 X = df.drop(target, axis=1)
@@ -72,6 +73,7 @@ df.head()
 # DataFrame Mapper
 mapper = DataFrameMapper([
      (['danceability'], StandardScaler()),
+     ('explicit', LabelEncoder()),
      (['energy'], [StandardScaler()]),
      (['key'], [StandardScaler()]),
      (['loudness'],  [StandardScaler()]),
@@ -87,14 +89,16 @@ mapper = DataFrameMapper([
 Z_train = mapper.fit_transform(X_train)
 Z_test = mapper.transform(X_test)
 
-from sklearn.ensemble import RandomForestClassifier
+
+from sklearn.linear_model import LogisticRegression
+
 
 # Base Model
 model = RandomForestClassifier()
+# model = LogisticRegression()
 model.fit(Z_train,y_train)
 model.score(Z_train,y_train)
 model.score(Z_test,y_test)
-model.predict(Z_test[1])
 
 # # personal testing
 # yhat = model.predict(Z_test)
