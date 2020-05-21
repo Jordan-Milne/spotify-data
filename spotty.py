@@ -4,10 +4,7 @@ from dotenv import load_dotenv, find_dotenv
 import pandas as pd
 import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
-from sklearn.model_selection import train_test_split
-from sklearn_pandas import DataFrameMapper
-from sklearn.preprocessing import StandardScaler, LabelEncoder, LabelBinarizer
-from sklearn.ensemble import RandomForestClassifier
+
 
 # Loading API keys
 load_dotenv(find_dotenv())
@@ -23,7 +20,7 @@ sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
 def analyze_playlist(creator, playlist_id,person):
 
     # Create empty dataframe
-    column_list = ["artist","album","track_name",  "track_id","explicit", "danceability","energy","key","loudness","mode", "speechiness","instrumentalness","liveness","valence","tempo", "duration_ms","time_signature"]
+    column_list = ["artist","album","track_name",  "track_id","explicit","popularity", "danceability","energy","key","loudness","mode", "speechiness","instrumentalness","liveness","valence","tempo", "duration_ms","time_signature"]
 
     main_df = pd.DataFrame(columns = column_list)
 
@@ -37,10 +34,11 @@ def analyze_playlist(creator, playlist_id,person):
         features["track_name"] = track["track"]["name"]
         features["track_id"] = track["track"]["id"]
         features["explicit"] = track['track']['explicit']
+        features["popularity"] = track['track']['popularity']
 
         # collecting meta data (audio features)
         audio_features = sp.audio_features(features["track_id"])[0]
-        for feature in column_list[5:]:
+        for feature in column_list[6:]:
             features[feature] = audio_features[feature]
 
         # merge
@@ -64,47 +62,6 @@ df4 = analyze_playlist("spotify", play_list4_id,'jordan')
 # merge
 df = pd.concat([df1, df2,df3,df4], ignore_index = True)
 
-target = 'person'
-y = df[target]
-X = df.drop(target, axis=1)
-X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=42)
-df.head()
+# export
 
-# DataFrame Mapper
-mapper = DataFrameMapper([
-     (['danceability'], StandardScaler()),
-     ('explicit', LabelEncoder()),
-     (['energy'], [StandardScaler()]),
-     (['key'], [StandardScaler()]),
-     (['loudness'],  [StandardScaler()]),
-     (['mode'], StandardScaler()),
-     (['speechiness'], StandardScaler()),
-     (['instrumentalness'], StandardScaler()),
-     (['liveness'],  StandardScaler()),
-     (['valence'], StandardScaler()),
-     (['tempo'],  StandardScaler()),
-     (['duration_ms'],  StandardScaler()),
-     ], df_out=True)
-
-Z_train = mapper.fit_transform(X_train)
-Z_test = mapper.transform(X_test)
-
-
-from sklearn.linear_model import LogisticRegression
-
-
-# Base Model
-model = RandomForestClassifier()
-# model = LogisticRegression()
-model.fit(Z_train,y_train)
-model.score(Z_train,y_train)
-model.score(Z_test,y_test)
-
-# # personal testing
-# yhat = model.predict(Z_test)
-#
-#
-# pd.DataFrame({
-#     'y_true': y_test,
-#     'y_hat': yhat
-# })
+df.to_csv('playlists.csv', index=False)
