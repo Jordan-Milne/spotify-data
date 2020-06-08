@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+  <head>
+    <meta charset="utf-8">
+    <link rel="stylesheet" type="text/css" href="static/style.css">
+    <link href="https://fonts.googleapis.com/css?family=Oswald|Raleway&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Raleway:700i&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+    <title>Spotify Playlists</title>
+  </head>
+  <body>
+
+    <img src='https://images.unsplash.com/photo-1535925191244-17536ca4f8b6?ixlib=rb-1.2.1&q=80&fm=jpg' style='position:fixed;top:0px;left:0px;width:100%;height:100%;z-index:-1;'>
+
+    <!-- <img alt="full screen background image" src="https://i2.wp.com/movieplus.news/wp-content/uploads/2020/01/5-Reasons-Why-Seinfeld-Is-Better-Than-Curb-Your-Enthusiam-5-Why-Its-Worse.jpg?w=1500&ssl=1" id="full-screen-background-image" />
+      <div id="wrapper"> -->
+      <div class="fixed2">
+        <header>
+          <h1><font size="6">Enter two playlist IDs!</font></h1>
+           <form action = "/" method="POST">
+             <p><font size="4"><b>Playlist 1: </b></font><input name="playinglist1" type="text" value="22weifwjefwen432rnd" class="mytext" /> VS.
+              <font size="4"><b>Playlist 2: </b></font><input name="playinglist2" type="text" value="24kcsdacwnw4jou58dsc" class="mytext" style="width: 75px;" />
+            </p>
+             <p><input type ="submit" value="Submit"/></p>
+           </form>
+           {% if rocauc %}
+           <h3><font size="6">Playlist Similarity:</font></h3>
+               <p><font size="3">{{ rocauc }}</font></p>
+           {% endif %}
+
+         </header>
+       </div>
+       <!-- </div> -->
+  </body>
+</html>
