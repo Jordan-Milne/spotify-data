@@ -1,5 +1,3 @@
-import pickle
-
 from flask import Flask, render_template, request, jsonify
 import os
 from dotenv import load_dotenv, find_dotenv
@@ -14,14 +12,20 @@ from sklearn.model_selection import GridSearchCV
 from sklearn.metrics import confusion_matrix, roc_auc_score, auc, roc_curve
 from catboost import CatBoostClassifier
 
+load_dotenv(find_dotenv())
+cid = os.environ['CLIENT_ID']
+secret = os.environ['CLIENT_SECRET']
+client_credentials_manager = SpotifyClientCredentials(client_id=cid, client_secret=secret)
+sp = spotipy.Spotify(client_credentials_manager=client_credentials_manager)
+
 app = Flask(__name__, template_folder='templates')
 
 @app.route('/', methods=['GET','POST'])
 def index():
-    import spotipy
     rocauc = ''
     args = request.form
     def spot_model(pl_1,pl_2):
+
         # Function to make dataframe from playlist
         def analyze_playlist(creator, playlist_id,person):
 
@@ -60,7 +64,7 @@ def index():
 
 
         # merge
-        df = pd.concat([df2,df3], ignore_index = True)
+        df = pd.concat([df1,df2], ignore_index = True)
 
 
         # Manually Label Encoding the person column
@@ -111,18 +115,17 @@ def index():
             y_train,
             eval_set=(Z_train, y_train),
             verbose=False,
-            plot=True)
-        print(model.score(Z_test,y_test))
+            plot=False)
 
         # calculate the fpr and tpr for all thresholds of the classification
         probs = model.predict_proba(Z_test)
         preds = probs[:,1]
         fpr, tpr, threshold = roc_curve(y_test, preds)
-        roc_auc = auc(fpr, tpr)
-
-
+        roc_auc = round(auc(fpr, tpr),2)
+        return roc_auc
     if request.method == 'POST':
-        rocauc = str(spot_model(args.get('playinglist1'), args.get('playinglist1')))
+        rocauc = str(spot_model(args.get('playinglist1'), args.get('playinglist2')))
+        # rocauc = '88.5'
 
     return render_template('index.html', rocauc=rocauc)
 
