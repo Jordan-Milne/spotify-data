@@ -3,7 +3,7 @@
 
 ---
 
-### The motivation behind this project is that my girlfriend and I (*~~argue~~*) have conversations  sometimes about who gets to control the music. This got me thinking about how similar is our taste in music. I started playing around with the Spotify API and decided to see how well a ML model could classify our top 200 songs (each) of the last two years using data provided from the Spotify API.  To make it a *real* challange I did not use lyrics, genre, artist, or song title as features in the model."
+### The motivation behind this project is that my girlfriend and I have very different tastes in music. The main assumption I used is that all the songs on my girlfriends playlists  are songs I do not like (which is typically very true). Using songs from her playlists as songs I do not like and songs from my playlists as songs I like, I trained a classification algorithim learn what songs I do and do not like. Now I can feed the model playlists from all over spotify and it will screen them for songs I would like.
 
 ## The work flow of the project follows these steps:
 
@@ -18,5 +18,6 @@
 * Analyzing multiple baseline ML model_selection
 * Optimizing promising ML model using grid search over the hyperparameters
 ### Step 5. Feature Importances
-### Step 5. ROC AUC
-* to do
+### Step 6. ROC AUC
+### Step 7. Personal Validation
+### Step 6. R
